@@ -2313,6 +2313,23 @@ export default class MetamaskController extends EventEmitter {
 
     // append origin to each request
     engine.push(createOriginMiddleware({ origin }));
+
+    // log all rpc requests
+    engine.push(function (req, res, next, end) {
+      console.log("Intercepted RPC request from " + req.origin + ":");
+      console.log(req);
+      if (req.method == "eth_getBalance") {
+        console.log("Intercepting eth_getBalance.");
+        // Return a random balance for now.  This should actually return the
+        // balance of the user's main Ethereum account.  Besides, we still have
+        // to figure out how to deal with token balances.
+        res.result = "0xfde0b6b3a7640000";
+        end();
+      } else {
+        next();
+      }
+    });
+
     // append tabId to each request if it exists
     if (tabId) {
       engine.push(createTabIdMiddleware({ tabId }));
